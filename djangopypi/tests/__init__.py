@@ -3,6 +3,7 @@ import unittest
 import xmlrpclib
 import StringIO
 #from djangopypi.views import parse_distutils_request, simple
+import django.test
 from djangopypi.models import Package, Classifier, Release, PackageInfoField, Distribution
 from django.test.client import Client
 from django.core.urlresolvers import reverse
@@ -139,46 +140,11 @@ class TestSimpleView(unittest.TestCase):
     #     response = simple(request)
     #     self.assertEquals(400, response.status_code)
 
-from django.test.client import MULTIPART_CONTENT
-class XmlRpcClient(Client):
-    def __init__(self, *args, **kwargs):
-        self.extra_headers = {}
-        super(XmlRpcClient, self).__init__(*args, **kwargs)
-    
-    def putheader(self, key, value):
-        self.extra_headers[key] = value
-    def endheaders(self, request_body):
-        pass
-    def getresponse(self, buffering=True):
-        return self.response
-    def post(self, path, data={}, content_type="text/xml",
-                 follow=False, **extra):
-        """
-        Requests a response from the server using POST.
-        """
-        extra.update(self.extra_headers)
-        response = super(XmlRpcClient, self).post(path, data, content_type, follow, **extra)
-        return response.content
+
+from djangotestclientxmlrpctransport import DjangoTestClientXMLRPCTransport
 
 
-class ProxiedTransport(xmlrpclib.Transport):
-    def set_proxy(self, proxy):
-        self.proxy = proxy
-    def make_connection(self, host):
-        return XmlRpcClient()
-    def single_request(self, host, handler, request_body, verbose=0):
-        connection = self.make_connection(host)
-        response = connection.post('/pypi/', request_body)
-        data, methodname = xmlrpclib.loads(response)
-        return data
-    
-    def send_host(self, connection, host):
-        pass
-    
-    def send_user_agent(self, *args, **kwargs):
-        pass
-
-class TestXmlRpc(unittest.TestCase):
+class TestXmlRpc(django.test.TestCase):
     """
     Test that the server responds to xmlrpc requests
     """
@@ -198,13 +164,13 @@ class TestXmlRpc(unittest.TestCase):
         self.dummy_user.delete()
     
     def test_list_package(self):
-        pypi = xmlrpclib.ServerProxy("http://localhost/pypi/", ProxiedTransport())
+        pypi = xmlrpclib.ServerProxy("http://localhost/pypi/", transport=DjangoTestClientXMLRPCTransport(self.client))
         pypi_hits = pypi.list_packages()
         expected = ['foo']
         self.assertEqual(pypi_hits, expected)
     
     def test_package_releases(self):
-        pypi = xmlrpclib.ServerProxy("http://localhost/pypi/", ProxiedTransport())
+        pypi = xmlrpclib.ServerProxy("http://localhost/pypi/", transport=DjangoTestClientXMLRPCTransport(self.client))
         pypi_hits = pypi.package_releases('foo')
         expected = ['1.0']
         self.assertEqual(pypi_hits, expected)
