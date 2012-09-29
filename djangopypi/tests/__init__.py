@@ -113,7 +113,7 @@ class TestSearch(unittest.TestCase):
     
     def test_search_for_package(self):
         response = client.post(reverse('djangopypi-search'), {'search_term': 'foo'})
-        self.assertTrue("The quick brown fox jumps over the lazy dog." in response.content)
+        self.assertTrue("""<a href="/pypi/pypi/foo/">foo</a>""" in response.content)
         
 class TestSimpleView(unittest.TestCase):
     
