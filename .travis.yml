@@ -6,6 +6,6 @@ python:
   - 2.7
   - pypy
 
-before_install: pip install --use-mirrors Django
+before_install: pip install --use-mirrors Django djangotestxmlrpc
 install: python setup.py install
 script: python test_environment/manage.py test

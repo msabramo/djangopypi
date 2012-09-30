@@ -46,4 +46,5 @@ setup(
         'setuptools',
         'setuptools-git',
     ],
+    tests_require=['djangotestxmlrpc'],
 )

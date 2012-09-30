@@ -141,7 +141,7 @@ class TestSimpleView(unittest.TestCase):
     #     self.assertEquals(400, response.status_code)
 
 
-from djangotestclientxmlrpctransport import DjangoTestClientXMLRPCTransport
+from djangotestxmlrpc import DjangoTestClientXMLRPCTransport
 
 
 class TestXmlRpc(django.test.TestCase):
